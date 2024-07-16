@@ -33,6 +33,7 @@ from ...translations import error_codes as translatable_error_codes
 from ...warehouse import error_codes as warehouse_error_codes
 from ...webhook import error_codes as webhook_error_codes
 from ..notifications import error_codes as external_notifications_error_codes
+from ...review import error_codes as review_error_codes
 from .doc_category import (
     DOC_CATEGORY_APPS,
     DOC_CATEGORY_ATTRIBUTES,
@@ -378,3 +379,6 @@ WebhookTriggerErrorCode = graphene.Enum.from_enum(
     webhook_error_codes.WebhookTriggerErrorCode
 )
 WebhookTriggerErrorCode.doc_category = DOC_CATEGORY_WEBHOOKS
+
+ReviewErrorCode = graphene.Enum.from_enum(review_error_codes.ReviewErrorCode)
+ReviewErrorCode.doc_category = DOC_CATEGORY_PRODUCTS

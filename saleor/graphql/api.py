@@ -49,6 +49,9 @@ from .warehouse.schema import (
 from .webhook.schema import WebhookMutations, WebhookQueries
 from .webhook.subscription_types import WEBHOOK_TYPES_MAP, Subscription
 
+from .review.schema import ReviewMutations, ReviewQueries
+
+
 API_PATH = SimpleLazyObject(lambda: reverse("api"))
 
 
@@ -75,6 +78,7 @@ class Query(
     TranslationQueries,
     WarehouseQueries,
     WebhookQueries,
+    ReviewQueries,
 ):
     pass
 
@@ -104,6 +108,7 @@ class Mutation(
     TaxMutations,
     WarehouseMutations,
     WebhookMutations,
+    ReviewMutations,
 ):
     pass
 
