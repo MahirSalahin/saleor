@@ -342,6 +342,9 @@ ProductVariantBulkErrorCode.doc_category = DOC_CATEGORY_PRODUCTS
 CollectionErrorCode = graphene.Enum.from_enum(product_error_codes.CollectionErrorCode)
 CollectionErrorCode.doc_category = DOC_CATEGORY_PRODUCTS
 
+ReviewErrorCode = graphene.Enum.from_enum(review_error_codes.ReviewErrorCode)
+ReviewErrorCode.doc_category = DOC_CATEGORY_PRODUCTS
+
 SendConfirmationEmailErrorCode = graphene.Enum.from_enum(
     account_error_codes.SendConfirmationEmailErrorCode
 )
@@ -379,6 +382,3 @@ WebhookTriggerErrorCode = graphene.Enum.from_enum(
     webhook_error_codes.WebhookTriggerErrorCode
 )
 WebhookTriggerErrorCode.doc_category = DOC_CATEGORY_WEBHOOKS
-
-ReviewErrorCode = graphene.Enum.from_enum(review_error_codes.ReviewErrorCode)
-ReviewErrorCode.doc_category = DOC_CATEGORY_PRODUCTS

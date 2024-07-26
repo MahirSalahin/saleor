@@ -79,6 +79,7 @@ if TYPE_CHECKING:
         ProductType,
         ProductVariant,
     )
+    from ..review.models import Review, ReviewMedia
     from ..shipping.interface import ShippingMethodData
     from ..shipping.models import ShippingMethod, ShippingZone
     from ..site.models import SiteSettings
@@ -915,6 +916,22 @@ class PluginsManager(PaymentInterface):
         default_value = None
         return self.__run_method_on_plugins(
             "draft_order_deleted", default_value, order, channel_slug=order.channel.slug
+        )
+
+    def review_updated(self, review: "Review", webhooks=None):
+        default_value = None
+        return self.__run_method_on_plugins(
+            "review_updated",
+            default_value,
+            review,
+            webhooks=webhooks,
+            channel_slug=None,
+        )
+
+    def review_media_created(self, media: "ReviewMedia"):
+        default_value = None
+        return self.__run_method_on_plugins(
+            "review_media_created", default_value, media, channel_slug=None
         )
 
     def sale_created(self, sale: "Promotion", current_catalogue):

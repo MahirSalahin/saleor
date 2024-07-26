@@ -1,63 +1,48 @@
 import graphene
-from ....review.models import Review
-from ....account.models import User
-from ....product.models import Product
+from django.core.exceptions import ValidationError
+from ....review import models
 from ....permission.enums import ProductPermissions
+from ....core.exceptions import PermissionDenied
 from ...core.mutations import ModelMutation
-from ..types import ReviewType
-from ..errors import ReviewError
+from ...core.context import disallow_replica_in_context, setup_context_user
+from ...core.types import ReviewError
+from ..types import Review
 
 
 class UpdateProductReviewInput(graphene.InputObjectType):
-    review_id = graphene.ID(required=True, description="ID of the Review to update")
+    id = graphene.GlobalID(required=True, description="ID of the Review to update")
+    status = graphene.Boolean(description="Whether the review is approved or not")
+    isHelpful = graphene.Boolean(description="Whether the review is helpful or not")
+
 
 class UpdateProductReview(ModelMutation):
-
     class Arguments:
         input = UpdateProductReviewInput(
             required=True, description="Fields require to update a review"
         )
 
     class Meta:
-        description = "Change status of existing review."
-        model = Review
-        object_type = ReviewType
+        description = "Update existing review."
+        model = models.Review
+        object_type = Review
         error_type_class = ReviewError
         error_type_field = "review_errors"
+        permissions = (ProductPermissions.MANAGE_PRODUCTS,)
 
     @classmethod
     def perform_mutation(cls, root, info, **data):
-        input_data = data.get("input")
+        review_id = data["input"]["id"]
+        
+        try:
+            review = models.Review.objects.get(pk=review_id)
+        except models.Review.DoesNotExist:
+            raise ValidationError({"id": "Review not found."})
 
-        if input_data is None:
-            raise cls.error_type().error_fields_missing()
+        if "status" in data["input"]:
+            review.status = data["input"]["status"]
 
-        # Extract fields from input_data
-        product_id = input_data.get("product_id")
-        user_id = input_data.get("user_id")
-        rating = input_data.get("rating")
-        title = input_data.get("title")
-        review = input_data.get("review")
+        if "isHelpful" in data["input"]:
+            review.helpful += int(data["input"]["isHelpful"])
 
-        if not all([product_id, user_id, rating, title, review]):
-            raise cls.error_type().error_fields_missing()
-
-        # Fetch related objects
-        user = User.objects.get(pk=user_id)
-        product = Product.objects.get(pk=product_id)
-
-        # Create and save the review
-        review_instance = Review(
-            user=user,
-            product=product,
-            rating=rating,
-            title=title,
-            review=review,
-        )
-        review_instance.save()
-
-        return UpdateProductReview(review=review_instance)
-
-    @classmethod
-    def save(cls, info, instance, cleaned_input):
-        super().save(info, instance, cleaned_input)
+        review.save()
+        return cls.success_response(review)

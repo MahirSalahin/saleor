@@ -1,19 +1,39 @@
 import graphene
-from .mutations.review_submit import SubmitProductReview
-from ...review.models import Review
-from .types import ReviewType
+from .mutations import (
+    SubmitProductReview,
+    UpdateProductReview,
+    DeleteProductReview,
+    ReviewMediaCreate,
+)
+from ...review import models
+from .types import Review
 
 
 class ReviewQueries(graphene.ObjectType):
-    getProductReview = graphene.List(ReviewType, product_id=graphene.ID(required=True))
-    getAllProductReviews = graphene.List(ReviewType)
+    getProductReview = graphene.List(
+        Review,
+        product=graphene.ID(),
+        id=graphene.ID(),
+        description="Look up review(s) by id and/or product",
+    )
+    getAllProductReviews = graphene.List(
+        Review, description="Look up the list of reviews"
+    )
 
-    def resolve_getProductReview(self, info, product_id):
-        return Review.objects.filter(product_id=product_id)
+    def resolve_getProductReview(self, info, product=None, id=None):
+        if product and id:
+            return models.Review.objects.filter(product=product, id=id)
+        if product:
+            return models.Review.objects.filter(product=product)
+        if id:
+            return models.Review.objects.filter(id=id)
 
     def resolve_getAllProductReviews(self, info):
-        return Review.objects.all()
+        return models.Review.objects.all()
 
 
 class ReviewMutations(graphene.ObjectType):
     submitProductReview = SubmitProductReview.Field()
+    updateProductReview = UpdateProductReview.Field()
+    deleteProductReview = DeleteProductReview.Field()
+    createReviewMedia = ReviewMediaCreate.Field()

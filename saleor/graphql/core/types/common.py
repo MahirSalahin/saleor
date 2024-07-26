@@ -75,6 +75,7 @@ from ..enums import (
     ProductTranslateErrorCode,
     ProductVariantBulkErrorCode,
     ProductVariantTranslateErrorCode,
+    ReviewErrorCode,
     SendConfirmationEmailErrorCode,
     ShippingErrorCode,
     ShopErrorCode,
@@ -570,6 +571,11 @@ class ProductVariantBulkError(Error):
     class Meta:
         doc_category = DOC_CATEGORY_PRODUCTS
 
+
+class ReviewError(Error):
+    code = ReviewErrorCode(description="The error code", required=True)
+    class Meta:
+        doc_category = DOC_CATEGORY_PRODUCTS
 
 class ShopError(Error):
     code = ShopErrorCode(description="The error code.", required=True)
