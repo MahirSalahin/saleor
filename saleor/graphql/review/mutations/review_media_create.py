@@ -33,7 +33,7 @@ class ReviewMediaCreateInput(BaseInputObjectType):
         doc_category = DOC_CATEGORY_PRODUCTS
 
 
-class ReviewMediaCreate(BaseMutation):
+class CreateReviewMedia(BaseMutation):
     review = graphene.Field(Review)
     media = graphene.Field(ReviewMedia)
 
@@ -142,4 +142,4 @@ class ReviewMediaCreate(BaseMutation):
         cls.call_event(manager.review_updated, review)
         cls.call_event(manager.review_media_created, media)
         review = ChannelContext(node=review, channel_slug=None)
-        return ReviewMediaCreate(review=review, media=media)
+        return CreateReviewMedia(review=review, media=media)

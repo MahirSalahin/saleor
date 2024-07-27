@@ -21,7 +21,7 @@ from .dataloaders import ThumbnailByReviewMediaIdSizeAndFormatLoader
 
 
 class Review(ModelObjectType[models.Review]):
-    id = graphene.ID(required=True, description="ID of the review.")
+    id = graphene.GlobalID(required=True, description="ID of the review.")
     rating = graphene.Int(required=True, description="Rating of the review")
     review = graphene.String(required=True, description="Details of the review")
     title = graphene.String(required=True, description="Title of the review")

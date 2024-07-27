@@ -3,7 +3,7 @@ from .mutations import (
     SubmitProductReview,
     UpdateProductReview,
     DeleteProductReview,
-    ReviewMediaCreate,
+    CreateReviewMedia,
 )
 from ...review import models
 from .types import Review
@@ -36,4 +36,4 @@ class ReviewMutations(graphene.ObjectType):
     submitProductReview = SubmitProductReview.Field()
     updateProductReview = UpdateProductReview.Field()
     deleteProductReview = DeleteProductReview.Field()
-    createReviewMedia = ReviewMediaCreate.Field()
+    createReviewMedia = CreateReviewMedia.Field()
