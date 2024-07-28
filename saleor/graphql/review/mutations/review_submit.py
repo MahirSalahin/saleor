@@ -5,6 +5,7 @@ from ....review.error_codes import ReviewErrorCode
 from ...core.mutations import ModelMutation
 from ...core.types import ReviewError
 from ...core import ResolveInfo
+from ...plugins.dataloaders import get_plugin_manager_promise
 from ..types import Review
 
 
@@ -56,4 +57,8 @@ class SubmitProductReview(ModelMutation):
         instance = cls.construct_instance(instance, cleaned_input)
         cls.clean_instance(info, instance)
         cls.save(info, instance, cleaned_input)
+
+        manager = get_plugin_manager_promise(info.context).get()
+        cls.call_event(manager.review_created, instance)
+
         return cls.success_response(instance)

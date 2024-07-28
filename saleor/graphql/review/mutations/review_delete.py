@@ -6,6 +6,7 @@ from ....permission.enums import ProductPermissions
 from ....core.exceptions import PermissionDenied
 from ...core.mutations import ModelDeleteMutation
 from ...core.types.common import ReviewError
+from ...plugins.dataloaders import get_plugin_manager_promise
 from ..types import Review
 
 
@@ -19,7 +20,7 @@ class DeleteProductReview(ModelDeleteMutation):
         object_type = Review
         error_type_class = ReviewError
         error_type_field = "review_errors"
-        permissions = (ProductPermissions.MANAGE_PRODUCTS,)
+        # permissions = (ProductPermissions.MANAGE_PRODUCTS,)
 
     @classmethod
     def clean_instance(cls, info, instance):
@@ -41,7 +42,7 @@ class DeleteProductReview(ModelDeleteMutation):
         cls.clean_instance(info, instance)
         db_id = instance.id
         instance.delete()
-
         instance.id = db_id
-        cls.post_save_action(info, instance, None)
+        manager = get_plugin_manager_promise(info.context).get()
+        cls.call_event(manager.review_deleted, instance)
         return cls.success_response(instance)

@@ -1,5 +1,5 @@
 from django.db import models, transaction
-from ..core.models import ModelWithMetadata, SortableModel
+from ..core.models import ModelWithMetadata
 from . import ReviewMediaTypes
 
 
@@ -38,12 +38,11 @@ class Review(ModelWithMetadata):
         self.save()
 
 
-class ReviewMedia(SortableModel, ModelWithMetadata):
+class ReviewMedia(ModelWithMetadata):
     review = models.ForeignKey(
         Review,
         related_name="media",
         on_delete=models.CASCADE,
-        # DEPRECATED
         null=True,
         blank=True,
     )
@@ -56,11 +55,9 @@ class ReviewMedia(SortableModel, ModelWithMetadata):
     )
     external_url = models.CharField(max_length=256, blank=True, null=True)
     oembed_data = models.JSONField(blank=True, default=dict)
-    # DEPRECATED
-    to_remove = models.BooleanField(default=False)
 
     class Meta(ModelWithMetadata.Meta):
-        ordering = ("sort_order", "pk")
+        ordering = ("pk",)
         app_label = "review"
 
     def get_ordering_queryset(self):
@@ -70,4 +67,4 @@ class ReviewMedia(SortableModel, ModelWithMetadata):
 
     @transaction.atomic
     def delete(self, *args, **kwargs):
-        super(SortableModel, self).delete(*args, **kwargs)
+        super().delete(*args, **kwargs)

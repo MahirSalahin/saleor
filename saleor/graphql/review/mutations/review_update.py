@@ -6,6 +6,7 @@ from ....core.exceptions import PermissionDenied
 from ...core.mutations import ModelMutation
 from ...core.context import disallow_replica_in_context, setup_context_user
 from ...core.types import ReviewError
+from ...plugins.dataloaders import get_plugin_manager_promise
 from ..types import Review
 
 
@@ -32,7 +33,7 @@ class UpdateProductReview(ModelMutation):
     @classmethod
     def perform_mutation(cls, root, info, **data):
         review_id = data["input"]["id"]
-        
+
         try:
             review = models.Review.objects.get(pk=review_id)
         except models.Review.DoesNotExist:
@@ -45,4 +46,8 @@ class UpdateProductReview(ModelMutation):
             review.helpful += int(data["input"]["isHelpful"])
 
         review.save()
+
+        manager = get_plugin_manager_promise(info.context).get()
+        cls.call_event(manager.review_updated, review)
+
         return cls.success_response(review)

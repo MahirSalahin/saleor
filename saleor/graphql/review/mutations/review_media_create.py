@@ -10,7 +10,6 @@ from ...core import ResolveInfo
 from ...core.types import BaseInputObjectType, Upload
 from ...core.doc_category import DOC_CATEGORY_PRODUCTS
 from ...core.mutations import BaseMutation
-from ...channel import ChannelContext
 from ...core.types import ReviewError
 from ...plugins.dataloaders import get_plugin_manager_promise
 from ...core.validators.file import clean_image_file, is_image_url, validate_image_url
@@ -19,7 +18,7 @@ from ..types import Review, ReviewMedia
 ALT_CHAR_LIMIT = 250
 
 
-class ReviewMediaCreateInput(BaseInputObjectType):
+class CreateReviewMediaInput(BaseInputObjectType):
     alt = graphene.String(description="Alt text for a review media.")
     image = Upload(
         required=False, description="Represents an image file in a multipart request."
@@ -38,7 +37,7 @@ class CreateReviewMedia(BaseMutation):
     media = graphene.Field(ReviewMedia)
 
     class Arguments:
-        input = ReviewMediaCreateInput(
+        input = CreateReviewMediaInput(
             required=True, description="Fields required to create a review media."
         )
 
@@ -50,7 +49,6 @@ class CreateReviewMedia(BaseMutation):
             "https://github.com/jaydenseric/graphql-multipart-request-spec"
         )
         doc_category = DOC_CATEGORY_PRODUCTS
-        # permissions = (ProductPermissions.MANAGE_PRODUCTS,)
         error_type_class = ReviewError
         error_type_field = "review_errors"
 
@@ -141,5 +139,4 @@ class CreateReviewMedia(BaseMutation):
         manager = get_plugin_manager_promise(info.context).get()
         cls.call_event(manager.review_updated, review)
         cls.call_event(manager.review_media_created, media)
-        review = ChannelContext(node=review, channel_slug=None)
         return CreateReviewMedia(review=review, media=media)

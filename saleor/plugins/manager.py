@@ -918,6 +918,16 @@ class PluginsManager(PaymentInterface):
             "draft_order_deleted", default_value, order, channel_slug=order.channel.slug
         )
 
+    def review_created(self, review: "Review", webhooks=None):
+        default_value = None
+        return self.__run_method_on_plugins(
+            "review_created",
+            default_value,
+            review,
+            channel_slug=None,
+            webhooks=webhooks,
+        )
+
     def review_updated(self, review: "Review", webhooks=None):
         default_value = None
         return self.__run_method_on_plugins(
@@ -928,10 +938,41 @@ class PluginsManager(PaymentInterface):
             channel_slug=None,
         )
 
+    def review_deleted(self, review: "Review", webhooks=None):
+        default_value = None
+        return self.__run_method_on_plugins(
+            "review_deleted",
+            default_value,
+            review,
+            webhooks=webhooks,
+            channel_slug=None,
+        )
+
     def review_media_created(self, media: "ReviewMedia"):
         default_value = None
         return self.__run_method_on_plugins(
-            "review_media_created", default_value, media, channel_slug=None
+            "review_media_created",
+            default_value,
+            media,
+            channel_slug=None,
+        )
+
+    def review_media_updated(self, media: "ReviewMedia"):
+        default_value = None
+        return self.__run_method_on_plugins(
+            "review_media_updated",
+            default_value,
+            media,
+            channel_slug=None,
+        )
+
+    def review_media_deleted(self, media: "ReviewMedia"):
+        default_value = None
+        return self.__run_method_on_plugins(
+            "review_media_deleted",
+            default_value,
+            media,
+            channel_slug=None,
         )
 
     def sale_created(self, sale: "Promotion", current_catalogue):
