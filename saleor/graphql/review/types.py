@@ -39,7 +39,7 @@ class Review(ModelObjectType[models.Review]):
     product = graphene.ID(required=True, description="ID of the reviewed product.")
 
     media_by_id = graphene.Field(
-        lambda:ReviewMedia,
+        lambda: ReviewMedia,
         id=graphene.Argument(graphene.ID, description="ID of a review media."),
         description="Get a single review media by ID.",
     )
@@ -60,7 +60,12 @@ class Review(ModelObjectType[models.Review]):
 
     @staticmethod
     def resolve_media_by_id(root: ModelObjectType[models.Review], info, id):
-        return root.media.filter(id=id).first()
+        _type, pk = from_global_id_or_error(id, ReviewMedia)
+        return (
+            root.media.using(get_database_connection_name(info.context))
+            .filter(pk=pk)
+            .first()
+        )
 
 
 class ReviewMedia(ModelObjectType[models.ReviewMedia]):

@@ -140,6 +140,7 @@ from ..product.models import (
 from ..product.search import prepare_product_search_vector_value
 from ..product.tests.utils import create_image
 from ..product.utils.variants import fetch_variants_for_promotion_rules
+from ..review.models import Review, ReviewMedia
 from ..shipping.models import (
     ShippingMethod,
     ShippingMethodChannelListing,
@@ -7147,6 +7148,25 @@ def payment_dummy_credit_card(db, order_with_lines):
         billing_country_area=order_with_lines.billing_address.country_area,
         billing_email=order_with_lines.user_email,
     )
+
+
+@pytest.fixture
+def review(product, customer_user):
+    return Review.objects.create(
+        product=product.pk,
+        user=customer_user.pk,
+        rating=4,
+        title="Great Product!",
+        review="I really enjoyed using this product",
+        status=False,
+        helpful=0,
+    )
+
+
+@pytest.fixture
+def review_with_image(review, image, media_root):
+    ReviewMedia.objects.create(review=review, image=image)
+    return review
 
 
 @pytest.fixture

@@ -1,10 +1,7 @@
 import graphene
-from django.core.exceptions import ValidationError
 from ....review import models
 from ....permission.enums import ProductPermissions
-from ....core.exceptions import PermissionDenied
 from ...core.mutations import ModelMutation
-from ...core.context import disallow_replica_in_context, setup_context_user
 from ...core.types import ReviewError
 from ...plugins.dataloaders import get_plugin_manager_promise
 from ..types import Review
@@ -32,18 +29,19 @@ class UpdateProductReview(ModelMutation):
 
     @classmethod
     def perform_mutation(cls, root, info, **data):
-        review_id = data["input"]["id"]
-
-        try:
-            review = models.Review.objects.get(pk=review_id)
-        except models.Review.DoesNotExist:
-            raise ValidationError({"id": "Review not found."})
+        review = cls.get_node_or_error(
+            info,
+            data["input"]["id"],
+            field="id",
+            only_type=Review,
+            qs=models.Review.objects.all(),
+        )
 
         if "status" in data["input"]:
             review.status = data["input"]["status"]
 
         if "isHelpful" in data["input"]:
-            review.helpful += int(data["input"]["isHelpful"])
+            review.helpful += 1 if int(data["input"]["isHelpful"]) else -1
 
         review.save()
 

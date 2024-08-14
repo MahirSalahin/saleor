@@ -7,31 +7,32 @@ from .mutations import (
     UpdateReviewMedia,
     DeleteReviewMedia,
 )
-from ...review import models
+from ..core import ResolveInfo
 from .types import Review
+from .resolvers import resolve_getProductReviews, resolve_getProductReview
 
 
 class ReviewQueries(graphene.ObjectType):
     getProductReview = graphene.List(
         Review,
-        product=graphene.ID(),
-        id=graphene.ID(),
+        product=graphene.Argument(
+            graphene.ID,
+            description="Review of the product", required= False
+        ),
+        id=graphene.Argument(
+            graphene.ID, description="ID of the review.", required=False
+        ),
         description="Look up review(s) by id and/or product",
     )
-    getAllProductReviews = graphene.List(
-        Review, description="Look up the list of reviews"
-    )
+    getProductReviews = graphene.List(Review, description="Look up the list of reviews")
 
-    def resolve_getProductReview(self, info, product=None, id=None):
-        if product and id:
-            return models.Review.objects.filter(product=product, id=id)
-        if product:
-            return models.Review.objects.filter(product=product)
-        if id:
-            return models.Review.objects.filter(id=id)
+    def resolve_getProductReview(
+        _root, info: ResolveInfo, *, product=None, id=None, **kwargs
+    ):
+        return resolve_getProductReview(info, product, id)
 
-    def resolve_getAllProductReviews(self, info):
-        return models.Review.objects.all()
+    def resolve_getProductReviews(_root, info: ResolveInfo, **kwargs):
+        return resolve_getProductReviews(info)
 
 
 class ReviewMutations(graphene.ObjectType):

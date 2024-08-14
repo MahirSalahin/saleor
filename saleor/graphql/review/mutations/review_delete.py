@@ -1,9 +1,6 @@
 import graphene
-from graphql import GraphQLError
 from saleor.graphql.core import ResolveInfo
 from ....review import models
-from ....permission.enums import ProductPermissions
-from ....core.exceptions import PermissionDenied
 from ...core.mutations import ModelDeleteMutation
 from ...core.types.common import ReviewError
 from ...plugins.dataloaders import get_plugin_manager_promise
@@ -23,26 +20,11 @@ class DeleteProductReview(ModelDeleteMutation):
         # permissions = (ProductPermissions.MANAGE_PRODUCTS,)
 
     @classmethod
-    def clean_instance(cls, info, instance):
-        if not instance:
-            raise GraphQLError("Review not found.")
-
-    @classmethod
-    def get_instance(cls, info, **data):
-        review_id = data.get("id")
-        try:
-            instance = models.Review.objects.get(pk=review_id)
-        except models.Review.DoesNotExist:
-            raise GraphQLError(f"Review with id {review_id} does not exist.")
-        return instance
-
-    @classmethod
-    def perform_mutation(cls, _root, info, **data):
-        instance = cls.get_instance(info, **data)
-        cls.clean_instance(info, instance)
-        db_id = instance.id
-        instance.delete()
-        instance.id = db_id
+    def perform_mutation(cls, _root, info:ResolveInfo, **data):
+        review = cls.get_node_or_error(info, data["id"], only_type=Review)
+        review_id = review.id
+        review.delete()
+        review.id = review_id
         manager = get_plugin_manager_promise(info.context).get()
-        cls.call_event(manager.review_deleted, instance)
-        return cls.success_response(instance)
+        cls.call_event(manager.review_deleted, review)
+        return DeleteProductReview(review=review)
