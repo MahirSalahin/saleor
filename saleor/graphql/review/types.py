@@ -11,8 +11,8 @@ from ..core.federation import resolve_federation_references
 from ..core.utils import from_global_id_or_error
 from ..meta.types import ObjectWithMetadata
 from .enums import ReviewMediaType
-
-logger = logging.getLogger(__name__)
+from ..product.schema import ProductQueries
+from ..account.schema import AccountQueries
 
 
 class Review(ModelObjectType[models.Review]):
@@ -33,11 +33,8 @@ class Review(ModelObjectType[models.Review]):
         required=True, description="Number of times the review is voted as helpful"
     )
 
-    user = graphene.ID(
-        required=True, description="ID of the user who created the review."
-    )
-    product = graphene.ID(required=True, description="ID of the reviewed product.")
-
+    user = AccountQueries.user
+    product = ProductQueries.product
     media_by_id = graphene.Field(
         lambda: ReviewMedia,
         id=graphene.Argument(graphene.ID, description="ID of a review media."),
@@ -53,6 +50,18 @@ class Review(ModelObjectType[models.Review]):
         description = "Represents a review of a product"
         interfaces = [graphene.relay.Node]
         model = models.Review
+
+    @staticmethod
+    def resolve_user(root: ModelObjectType[models.Review], info):
+        return AccountQueries.resolve_user(
+            root, info, id=graphene.Node.to_global_id("User", root.user)
+        )
+
+    @staticmethod
+    def resolve_product(root: ModelObjectType[models.Review], info):
+        return ProductQueries.resolve_product(
+            root, info, id=graphene.Node.to_global_id("Product", root.product)
+        )
 
     @staticmethod
     def resolve_media(root: ModelObjectType[models.Review], info):
