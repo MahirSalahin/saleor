@@ -6,23 +6,20 @@ from ..product.types import Product
 from .types import Review
 
 
-def resolve_getProductReview(info, product: Optional[str], id: Optional[str]):
-    if product and id:
-        _, product = from_global_id_or_error(product, Product)
-        _, id = from_global_id_or_error(id, Review)
+def resolve_getProductReview(
+    info, product: Optional[str], id: Optional[str], status: Optional[bool]
+):
+    filters = {}
+    if product:
+        _, filters["product"] = from_global_id_or_error(product, Product)
+    if id:
+        _, filters["id"] = from_global_id_or_error(id, Review)
+    if status is not None:
+        filters["status"] = status
+    if filters:
         return models.Review.objects.using(
             get_database_connection_name(info.context)
-        ).filter(product=product, id=id)
-    elif product:
-        _, product = from_global_id_or_error(product, Product)
-        return models.Review.objects.using(
-            get_database_connection_name(info.context)
-        ).filter(product=product)
-    elif id:
-        _, id = from_global_id_or_error(id, Review)
-        return models.Review.objects.using(
-            get_database_connection_name(info.context)
-        ).filter(id=id)
+        ).filter(**filters)
     return None
 
 
