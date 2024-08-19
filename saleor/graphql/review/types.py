@@ -1,6 +1,9 @@
 import graphene
-import logging
 from ...review import models
+from ...account.models import User
+from ..account.types import User as UserType
+from ...product.models import Product
+from ..product.types import Product as ProductType
 from ...core.utils import build_absolute_uri
 from ..core.types import ModelObjectType
 from ..core.scalars import DateTime
@@ -12,7 +15,6 @@ from ..core.utils import from_global_id_or_error
 from ..meta.types import ObjectWithMetadata
 from .enums import ReviewMediaType
 from ..product.schema import ProductQueries
-from ..account.schema import AccountQueries
 
 
 class Review(ModelObjectType[models.Review]):
@@ -33,8 +35,16 @@ class Review(ModelObjectType[models.Review]):
         required=True, description="Number of times the review is voted as helpful"
     )
 
-    user = AccountQueries.user
-    product = ProductQueries.product
+    user = graphene.Field(
+        lambda: UserType,
+        required=True,
+        description="User who created the review",
+    )
+    product = graphene.Field(
+        lambda: ProductType,
+        required=True,
+        description="Product being reviewed",
+    )
     media_by_id = graphene.Field(
         lambda: ReviewMedia,
         id=graphene.Argument(graphene.ID, description="ID of a review media."),
@@ -53,14 +63,15 @@ class Review(ModelObjectType[models.Review]):
 
     @staticmethod
     def resolve_user(root: ModelObjectType[models.Review], info):
-        return AccountQueries.resolve_user(
-            root, info, id=graphene.Node.to_global_id("User", root.user)
-        )
+        return User.objects.get(pk=root.user)
 
     @staticmethod
     def resolve_product(root: ModelObjectType[models.Review], info):
         return ProductQueries.resolve_product(
-            root, info, id=graphene.Node.to_global_id("Product", root.product)
+            root,
+            info,
+            id=graphene.Node.to_global_id("Product", root.product),
+            channel="default-channel",
         )
 
     @staticmethod
